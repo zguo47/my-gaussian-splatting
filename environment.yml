@@ -5,10 +5,9 @@ channels:
   - defaults
 dependencies:
   - cudatoolkit=11.8
-  - pytorch-cuda=12.1
   - plyfile
   - python=3.10
-  - pip=22.3.1s
+  - pip=22.3.1
   - pytorch
   - torchaudio
   - torchvision
