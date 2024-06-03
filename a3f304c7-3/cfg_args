@@ -1,1 +1,0 @@
-Namespace(data_device='cuda', eval=True, images='images', model_path='./output/a3f304c7-3', resolution=-1, sh_degree=3, source_path='/nfshomes/zguo47/videosfm/datasets/cupboard', white_background=False)

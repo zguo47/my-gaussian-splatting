@@ -1,0 +1,1 @@
+Namespace(data_device='cuda', eval=True, images='images', model_path='./output/cbb8080e-7', resolution=-1, sh_degree=3, source_path='/nfshomes/zguo47/videosfm/test/gaussian-splatting/dino', white_background=False)
