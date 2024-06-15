@@ -140,28 +140,28 @@ class ToFDataset(object):
             self.dataset["color_light_poses"] += [self.color_light_poses[view_id]]
 
             ## TOF
-            if args.use_tof:
-                tof_im = np.squeeze(self._read_tof(tof_filename))
-                tof_im = self._process_tof(tof_im)
-                self.dataset["tof_images"].append(tof_im)
+            # if args.use_tof:
+            #     tof_im = np.squeeze(self._read_tof(tof_filename))
+            #     tof_im = self._process_tof(tof_im)
+            #     self.dataset["tof_images"].append(tof_im)
 
             ## Color
-            if args.use_color:
-                color_im = np.squeeze(self._read_color(color_filename))
-                color_im = self._process_color(color_im)
-                self.dataset["color_images"].append(color_im)
+            # if args.use_color:
+            color_im = np.squeeze(self._read_color(color_filename))
+            color_im = self._process_color(color_im)
+            self.dataset["color_images"].append(color_im)
 
             ## Depth
-            if args.use_depth or args.render_depth:
-                depth_im = np.squeeze(self._read_depth(depth_filename))
-                depth_im = self._process_depth(depth_im)
-                self.dataset["depth_images"].append(depth_im)
+            # if args.use_depth or args.render_depth:
+            #     depth_im = np.squeeze(self._read_depth(depth_filename))
+            #     depth_im = self._process_depth(depth_im)
+            #     self.dataset["depth_images"].append(depth_im)
 
-            ## Motion mask
-            if args.use_motion_mask:
-                motion_mask = np.squeeze(self._read_motion_mask(motion_mask_filename))
-                motion_mask = self._process_motion_mask(motion_mask)
-                self.dataset["motion_masks"].append(motion_mask)
+            # ## Motion mask
+            # if args.use_motion_mask:
+            #     motion_mask = np.squeeze(self._read_motion_mask(motion_mask_filename))
+            #     motion_mask = self._process_motion_mask(motion_mask)
+            #     self.dataset["motion_masks"].append(motion_mask)
 
             ## Anything else (e.g. saving files)
             self._process_data_extra(args)
@@ -246,85 +246,85 @@ class ToFDataset(object):
 
     def _scale_dataset(self, args):
         # Scale and crop
-        if args.use_tof:
-            self.dataset["tof_images"], _ = crop_mvs_input(
-                self.dataset["tof_images"],
-                self.dataset["tof_intrinsics"],
-                1,
-                None,
-                320,
-                240,
-            )
-            self.dataset["tof_images"], _ = scale_mvs_input(
-                self.dataset["tof_images"],
-                self.dataset["tof_intrinsics"],
-                1,
-                None,
-                1.0,
-            )
+        # if args.use_tof:
+        #     self.dataset["tof_images"], _ = crop_mvs_input(
+        #         self.dataset["tof_images"],
+        #         self.dataset["tof_intrinsics"],
+        #         1,
+        #         None,
+        #         320,
+        #         240,
+        #     )
+        #     self.dataset["tof_images"], _ = scale_mvs_input(
+        #         self.dataset["tof_images"],
+        #         self.dataset["tof_intrinsics"],
+        #         1,
+        #         None,
+        #         1.0,
+        #     )
 
-        if args.use_color:
-            self.dataset["color_images"], _ = crop_mvs_input(
-                self.dataset["color_images"],
-                self.dataset["color_intrinsics"],
-                1,
-                None,
-                320,
-                240,
-            )
-            self.dataset["color_images"], _ = scale_mvs_input(
-                self.dataset["color_images"],
-                self.dataset["color_intrinsics"],
-                1,
-                None,
-                1.0,
-            )
+        # if args.use_color:
+        self.dataset["color_images"], _ = crop_mvs_input(
+            self.dataset["color_images"],
+            self.dataset["color_intrinsics"],
+            1,
+            None,
+            320,
+            240,
+        )
+        self.dataset["color_images"], _ = scale_mvs_input(
+            self.dataset["color_images"],
+            self.dataset["color_intrinsics"],
+            1,
+            None,
+            1.0,
+        )
 
     def _stack_dataset(self, args):
         # Stack
-        if args.use_tof:
-            self.dataset["tof_images"] = normalize_im_max(
-                np.stack(self.dataset["tof_images"])
-            ).astype(np.float32)
-            self.dataset["tof_intrinsics"] = np.stack(
-                self.dataset["tof_intrinsics"]
-            ).astype(np.float32)
-            self.dataset["tof_extrinsics"] = np.stack(
-                self.dataset["tof_extrinsics"]
-            ).astype(np.float32)
-            self.dataset["tof_poses"] = np.stack(self.dataset["tof_poses"]).astype(
-                np.float32
-            )
-            self.dataset["tof_light_poses"] = np.stack(
-                self.dataset["tof_light_poses"]
-            ).astype(np.float32)
+        # if args.use_tof:
+        #     self.dataset["tof_images"] = normalize_im_max(
+        #         np.stack(self.dataset["tof_images"])
+        #     ).astype(np.float32)
+        #     self.dataset["tof_intrinsics"] = np.stack(
+        #         self.dataset["tof_intrinsics"]
+        #     ).astype(np.float32)
+        #     self.dataset["tof_extrinsics"] = np.stack(
+        #         self.dataset["tof_extrinsics"]
+        #     ).astype(np.float32)
+        #     self.dataset["tof_poses"] = np.stack(self.dataset["tof_poses"]).astype(
+        #         np.float32
+        #     )
+        #     self.dataset["tof_light_poses"] = np.stack(
+        #         self.dataset["tof_light_poses"]
+        #     ).astype(np.float32)
 
-        if args.use_color:
-            self.dataset["color_images"] = normalize_im_max(
-                np.stack(self.dataset["color_images"])
-            ).astype(np.float32)
-            self.dataset["color_intrinsics"] = np.stack(
-                self.dataset["color_intrinsics"]
-            ).astype(np.float32)
-            self.dataset["color_extrinsics"] = np.stack(
-                self.dataset["color_extrinsics"]
-            ).astype(np.float32)
-            self.dataset["color_poses"] = np.stack(self.dataset["color_poses"]).astype(
-                np.float32
-            )
-            self.dataset["color_light_poses"] = np.stack(
-                self.dataset["color_light_poses"]
-            ).astype(np.float32)
+        # if args.use_color:
+        self.dataset["color_images"] = normalize_im_max(
+            np.stack(self.dataset["color_images"])
+        ).astype(np.float32)
+        self.dataset["color_intrinsics"] = np.stack(
+            self.dataset["color_intrinsics"]
+        ).astype(np.float32)
+        self.dataset["color_extrinsics"] = np.stack(
+            self.dataset["color_extrinsics"]
+        ).astype(np.float32)
+        self.dataset["color_poses"] = np.stack(self.dataset["color_poses"]).astype(
+            np.float32
+        )
+        self.dataset["color_light_poses"] = np.stack(
+            self.dataset["color_light_poses"]
+        ).astype(np.float32)
 
-        if args.use_depth or args.render_depth:
-            self.dataset["depth_images"] = np.stack(
-                self.dataset["depth_images"]
-            ).astype(np.float32)
+        # if args.use_depth or args.render_depth:
+        #     self.dataset["depth_images"] = np.stack(
+        #         self.dataset["depth_images"]
+        #     ).astype(np.float32)
 
-        if args.use_motion_mask:
-            self.dataset["motion_masks"] = np.stack(
-                self.dataset["motion_masks"]
-            ).astype(bool)
+        # if args.use_motion_mask:
+        #     self.dataset["motion_masks"] = np.stack(
+        #         self.dataset["motion_masks"]
+        #     ).astype(bool)
 
     def _post_process_dataset(self, args):
         if args.use_tof:
