@@ -336,7 +336,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png"):
 def readToRFCameras(dataset, frame_ids, args):
     cam_infos = []
     color_extrinsics = dataset.dataset["color_extrinsics"]
-    print(color_extrinsics.shape)
+    print(np.array(color_extrinsics).shape)
 
     for frame_id in frame_ids:
         view_id = dataset.get_view_id[frame_id]
