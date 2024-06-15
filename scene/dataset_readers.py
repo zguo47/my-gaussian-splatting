@@ -349,7 +349,6 @@ def readToRFCameras(dataset, frame_ids, args):
         )  # torf extrinsics is already w2c
         T = color_extrinsics[view_id, :3, 3]
         color_image_path = dataset._get_color_filename(frame_id)
-        print(dataset.dataset["color_images"])
         color_image = Image.fromarray(
             np.array(dataset.dataset["color_images"][view_id] * 255.0, dtype=np.byte),
             "RGB",
@@ -499,7 +498,7 @@ def readToFPhasorStaticInfo(path, args, all_args):
 
     colors = None
 
-    num_pts = 5000
+    num_pts = 50000
     print(f"Generating random point cloud ({num_pts})...")
 
     # Init xyz
