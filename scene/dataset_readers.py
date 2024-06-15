@@ -341,7 +341,7 @@ def readToRFCameras(dataset, frame_ids, args):
         view_id = dataset.get_view_id[frame_id]
         color_image_path, color_image = "", None
         R, T = np.identity(3).astype(np.float32), np.zeros(3).astype(np.float32)
-
+        print(view_id)
         R = np.transpose(
             color_extrinsics[view_id, :3, :3]
         )  # torf extrinsics is already w2c
