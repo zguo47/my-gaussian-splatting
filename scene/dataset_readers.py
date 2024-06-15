@@ -29,7 +29,7 @@ import json
 from pathlib import Path
 import matplotlib.pyplot as plt
 from plyfile import PlyData, PlyElement
-from utils.sh_utils import SH2RGB, RGB2SH, SH2PA, PA2SH
+from utils.sh_utils import SH2RGB, RGB2SH
 from scene.gaussian_model import BasicPointCloud
 
 
