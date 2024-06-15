@@ -468,6 +468,7 @@ def readToFPhasorStaticInfo(path, args, all_args):
     #     dataset = ToFDataset(all_args)
 
     print("Reading training camera info from ToRF")
+    print(dataset.i_train)
     train_cam_infos = readToRFCameras(dataset, dataset.i_train, all_args)
     print("Reading testing camera info from ToRF")
     test_cam_infos = readToRFCameras(dataset, dataset.i_test, all_args)
