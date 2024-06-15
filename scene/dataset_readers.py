@@ -37,7 +37,7 @@ from scene.torf_datasets.tof_dataset import ToFDataset
 from scene.torf_datasets.ios_dataset import IOSDataset
 from scene.torf_datasets.real_dataset import RealDataset
 from scene.torf_datasets.mitsuba_dataset import MitsubaDataset
-from scene.torf_datasets.my_utils.utils import depth_from_tof
+from scene.torf_datasets.my_utils.my_utils import depth_from_tof
 from scene.torf_datasets.my_utils.projection_utils import *
 
 
