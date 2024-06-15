@@ -126,7 +126,7 @@ class ToFDataset(object):
             tof_filename = self._get_tof_filename(frame_id)
             color_filename = self._get_color_filename(frame_id)
             depth_filename = self._get_depth_filename(frame_id)
-            motion_mask_filename = self._get_motion_mask_filename(frame_id)
+            # motion_mask_filename = self._get_motion_mask_filename(frame_id)
 
             ## Camera params
             self.dataset["tof_intrinsics"] += [self.tof_intrinsics[view_id]]
@@ -158,10 +158,10 @@ class ToFDataset(object):
                 self.dataset["depth_images"].append(depth_im)
 
             ## Motion mask
-            if args.use_motion_mask:
-                motion_mask = np.squeeze(self._read_motion_mask(motion_mask_filename))
-                motion_mask = self._process_motion_mask(motion_mask)
-                self.dataset["motion_masks"].append(motion_mask)
+            # if args.use_motion_mask:
+            #     motion_mask = np.squeeze(self._read_motion_mask(motion_mask_filename))
+            #     motion_mask = self._process_motion_mask(motion_mask)
+            #     self.dataset["motion_masks"].append(motion_mask)
 
             ## Anything else (e.g. saving files)
             self._process_data_extra(args)
