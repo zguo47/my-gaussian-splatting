@@ -498,7 +498,7 @@ def readToFPhasorStaticInfo(path, args, all_args):
 
     colors = None
 
-    num_pts = 50000
+    num_pts = 100000
     print(f"Generating random point cloud ({num_pts})...")
 
     # Init xyz
