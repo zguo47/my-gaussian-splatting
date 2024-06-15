@@ -952,12 +952,14 @@ def gen_pipeline_mvs_list(dense_folder):
 
 
 def get_extrinsics(render_extrinsics_file, args, default_exts=None):
-    # if args.fix_view:
-    #     return np.stack([np.eye(4) for i in range(1)], axis=0)
+    if args.fix_view:
+        return np.stack([np.eye(4) for i in range(args.total_num_views)], axis=0)
 
     # Default if path does not exist
     if default_exts is None:
-        default_exts = np.stack([np.eye(4) for i in range(1)], axis=0)
+        default_exts = np.stack(
+            [np.eye(4) for i in range(args.total_num_views)], axis=0
+        )
 
     # Extrinsics
     render_extrinsics_file = os.path.join(render_extrinsics_file)
