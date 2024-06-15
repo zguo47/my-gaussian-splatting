@@ -340,8 +340,8 @@ class ToFDataset(object):
     def _process_bounds(self, args):
         self.dataset["bounds"] = np.stack(
             [
-                args.min_depth_fac * self.dataset["depth_range"],
-                args.max_depth_fac * self.dataset["depth_range"],
+                0.05 * self.dataset["depth_range"],
+                0.55 * self.dataset["depth_range"],
             ],
             axis=0,
         ).astype(np.float32)
