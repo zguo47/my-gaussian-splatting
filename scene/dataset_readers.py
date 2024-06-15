@@ -360,7 +360,6 @@ def readToRFCameras(dataset, frame_ids, args):
         cam_infos.append(
             CameraInfo(
                 uid=view_id,  # Unique ID of this camera
-                frame_id=frame_id,  # frame ID
                 R=R,
                 T=T,  # RGB camera pose
                 image=color_image,
