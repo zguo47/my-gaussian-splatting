@@ -327,14 +327,15 @@ class ToFDataset(object):
         #     ).astype(bool)
 
     def _post_process_dataset(self, args):
-        if args.use_tof:
-            self.dataset["tof_depth_images"] = np.squeeze(
-                depth_from_tof(
-                    self.dataset["tof_images"],
-                    self.dataset["depth_range"],
-                    args.phase_offset,
-                )
-            ).astype(np.float32)
+        pass
+        # if args.use_tof:
+        #     self.dataset["tof_depth_images"] = np.squeeze(
+        #         depth_from_tof(
+        #             self.dataset["tof_images"],
+        #             self.dataset["depth_range"],
+        #             args.phase_offset,
+        #         )
+        #     ).astype(np.float32)
 
     def _process_bounds(self, args):
         self.dataset["bounds"] = np.stack(
