@@ -47,13 +47,12 @@ class ToFDataset(object):
             tof_filename = self._get_tof_filename(frame_id)
             color_filename = self._get_color_filename(frame_id)
             depth_filename = self._get_depth_filename(frame_id)
-            motion_mask_filename = self._get_motion_mask_filename(frame_id)
+            # motion_mask_filename = self._get_motion_mask_filename(frame_id)
 
             if (
                 os.path.isfile(tof_filename)
                 or os.path.isfile(color_filename)
                 or os.path.isfile(depth_filename)
-                or os.path.isfile(motion_mask_filename)
             ):
                 self.get_frame_id[view_id] = frame_id
                 self.get_view_id[frame_id] = view_id
