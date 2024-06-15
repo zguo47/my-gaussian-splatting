@@ -356,24 +356,24 @@ class ToFDataset(object):
     def _create_splits(self, args):
         self.dataset["i_test"] = 0
 
-        if args.dynamic:
-            self.i_train = [
-                i
-                for i in range(
-                    args.view_start,
-                    args.view_start + args.num_views * args.view_step,
-                    args.view_step,
-                )
-            ]
-            self.i_test = self.i_train
-            self.i_val = [
-                i
-                for i in range(
-                    np.minimum(args.val_start, args.total_num_views - 1),
-                    np.minimum(args.val_end, args.total_num_views - 1),
-                )
-            ]
-        elif args.train_views != "":
+        # if args.dynamic:
+        #     self.i_train = [
+        #         i
+        #         for i in range(
+        #             args.view_start,
+        #             args.view_start + args.num_views * args.view_step,
+        #             args.view_step,
+        #         )
+        #     ]
+        #     self.i_test = self.i_train
+        #     self.i_val = [
+        #         i
+        #         for i in range(
+        #             np.minimum(args.val_start, args.total_num_views - 1),
+        #             np.minimum(args.val_end, args.total_num_views - 1),
+        #         )
+        #     ]
+        if args.train_views != "":
             self.i_train = np.array([int(i) for i in args.train_views.split(",")])
             self.i_test = [
                 i
