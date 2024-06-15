@@ -336,12 +336,12 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png"):
 def readToRFCameras(dataset, frame_ids, args):
     cam_infos = []
     color_extrinsics = dataset.dataset["color_extrinsics"]
+    print(color_extrinsics)
 
     for frame_id in frame_ids:
         view_id = dataset.get_view_id[frame_id]
         color_image_path, color_image = "", None
         R, T = np.identity(3).astype(np.float32), np.zeros(3).astype(np.float32)
-        print(view_id)
         R = np.transpose(
             color_extrinsics[view_id, :3, :3]
         )  # torf extrinsics is already w2c
