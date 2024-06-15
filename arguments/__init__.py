@@ -72,7 +72,7 @@ class ModelParams(ParamGroup):
         self.color_scale_factor = 1.0
 
         # ToF Dataset
-        self.dataset_type = "mitsuba"
+        self.dataset_type = "real"
         self.view_start = 1 # dynamic = 1, static = 0.
         self.num_views = 1
         self.total_num_views = 1
