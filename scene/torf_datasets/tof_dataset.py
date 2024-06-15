@@ -349,59 +349,58 @@ class ToFDataset(object):
     def _create_splits(self, args):
         self.dataset["i_test"] = 0
 
-        if args.dynamic:
-            self.i_train = [
-                i
-                for i in range(
-                    1,
-                    1 + 1 * 1,
-                    1,
-                )
-            ]
-            self.i_test = self.i_train
-            self.i_val = [
-                i
-                for i in range(
-                    np.minimum(args.val_start, 0),
-                    np.minimum(args.val_end, 0),
-                )
-            ]
-        elif args.train_views != "":
-            self.i_train = np.array([int(i) for i in args.train_views.split(",")])
-            self.i_test = [
-                i
-                for i in np.arange(args.view_start, args.view_start + args.num_views)
-                if (i not in self.i_train)
-            ]
-            self.i_val = self.i_test
-        else:
-            self.i_test = self.dataset["i_test"]
+        # if args.dynamic:
+        #     self.i_train = [
+        #         i
+        #         for i in range(
+        #             1,
+        #             1 + 1 * 1,
+        #             1,
+        #         )
+        #     ]
+        #     self.i_test = self.i_train
+        #     self.i_val = [
+        #         i
+        #         for i in range(
+        #             np.minimum(args.val_start, 0),
+        #             np.minimum(args.val_end, 0),
+        #         )
+        #     ]
+        # elif args.train_views != "":
+        #     self.i_train = np.array([int(i) for i in args.train_views.split(",")])
+        #     self.i_test = [
+        #         i
+        #         for i in np.arange(args.view_start, args.view_start + args.num_views)
+        #         if (i not in self.i_train)
+        #     ]
+        #     self.i_val = self.i_test
+        # else:
+        self.i_test = self.dataset["i_test"]
 
-            if not isinstance(self.i_test, list):
-                self.i_test = [self.i_test]
+        if not isinstance(self.i_test, list):
+            self.i_test = [self.i_test]
 
-            if args.autoholdout > 0:
-                print("Auto holdout,", args.autoholdout)
-                self.i_test = np.arange(args.num_views)[:: args.autoholdout]
+        # if args.autoholdout > 0:
+        #     print("Auto holdout,", args.autoholdout)
+        #     self.i_test = np.arange(args.num_views)[:: args.autoholdout]
 
-            self.i_val = self.i_test
+        self.i_val = self.i_test
 
-            self.i_train = [
-                i
-                for i in range(
-                    args.view_start,
-                    args.view_start + args.num_views * args.view_step,
-                    args.view_step,
-                )
-            ]
-            self.i_train = np.array(
-                [
-                    i
-                    for i in self.i_train
-                    if (i not in self.i_test and i not in self.i_val)
-                    or (args.num_views == 1)
-                ]
+        self.i_train = [
+            i
+            for i in range(
+                1,
+                1 + 1 * 1,
+                1,
             )
+        ]
+        self.i_train = np.array(
+            [
+                i
+                for i in self.i_train
+                if (i not in self.i_test and i not in self.i_val) or (1 == 1)
+            ]
+        )
 
         # Val frame numbers
         self.val_frames_idx = list(range(len(self.i_val)))
