@@ -152,10 +152,10 @@ class ToFDataset(object):
                 self.dataset["color_images"].append(color_im)
 
             ## Depth
-            if args.use_depth or args.render_depth:
-                depth_im = np.squeeze(self._read_depth(depth_filename))
-                depth_im = self._process_depth(depth_im)
-                self.dataset["depth_images"].append(depth_im)
+            # if args.use_depth or args.render_depth:
+            #     depth_im = np.squeeze(self._read_depth(depth_filename))
+            #     depth_im = self._process_depth(depth_im)
+            #     self.dataset["depth_images"].append(depth_im)
 
             ## Motion mask
             # if args.use_motion_mask:
@@ -324,15 +324,15 @@ class ToFDataset(object):
                 self.dataset["color_light_poses"]
             ).astype(np.float32)
 
-        if args.use_depth or args.render_depth:
-            self.dataset["depth_images"] = np.stack(
-                self.dataset["depth_images"]
-            ).astype(np.float32)
+        # if args.use_depth or args.render_depth:
+        #     self.dataset["depth_images"] = np.stack(
+        #         self.dataset["depth_images"]
+        #     ).astype(np.float32)
 
-        if args.use_motion_mask:
-            self.dataset["motion_masks"] = np.stack(
-                self.dataset["motion_masks"]
-            ).astype(bool)
+        # if args.use_motion_mask:
+        #     self.dataset["motion_masks"] = np.stack(
+        #         self.dataset["motion_masks"]
+        #     ).astype(bool)
 
     def _post_process_dataset(self, args):
         if args.use_tof:
