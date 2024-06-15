@@ -2,7 +2,7 @@ import numpy as np
 
 from scene.torf_datasets.tof_dataset import *
 
-from scene.torf_datasets.utils.projection_utils import *
+from scene.torf_datasets.my_utils.projection_utils import *
 
 
 class MitsubaDataset(ToFDataset):
@@ -10,13 +10,13 @@ class MitsubaDataset(ToFDataset):
         self,
         args,
         file_endings={
-            'tof': 'npy',
-            'color': 'npy',
-            'depth': 'npy',
-            'motion_mask': 'npy',
-            'cams': 'npy'
-            },
-        ):
+            "tof": "npy",
+            "color": "npy",
+            "depth": "npy",
+            "motion_mask": "npy",
+            "cams": "npy",
+        },
+    ):
         super().__init__(args, file_endings)
 
     def _read_tof(self, tof_filename):
