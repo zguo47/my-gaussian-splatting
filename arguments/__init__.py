@@ -57,7 +57,7 @@ class ModelParams(ParamGroup):
         self.eval = False
 
         # Types of images used for training
-        self.use_color = False      
+        self.use_color = True    
         self.use_tof = False
         self.use_depth = False # postprocessed depth map from ToF cameras, could be used to subtitute tof raw
         self.use_motion_mask = False
