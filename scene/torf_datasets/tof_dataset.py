@@ -123,10 +123,10 @@ class ToFDataset(object):
         for view_id in view_ids:
             frame_id = self.get_frame_id[view_id]
 
-            tof_filename = self._get_tof_filename(frame_id)
+            # tof_filename = self._get_tof_filename(frame_id)
             color_filename = self._get_color_filename(frame_id)
-            depth_filename = self._get_depth_filename(frame_id)
-            motion_mask_filename = self._get_motion_mask_filename(frame_id)
+            # depth_filename = self._get_depth_filename(frame_id)
+            # motion_mask_filename = self._get_motion_mask_filename(frame_id)
 
             ## Camera params
             self.dataset["tof_intrinsics"] += [self.tof_intrinsics[view_id]]
