@@ -46,6 +46,7 @@ class ParamGroup:
 
 class ModelParams(ParamGroup): 
     def __init__(self, parser, sentinel=False):
+        # Original 3DGS parameters
         self.sh_degree = 3
         self._source_path = ""
         self._model_path = ""
@@ -54,6 +55,56 @@ class ModelParams(ParamGroup):
         self._white_background = False
         self.data_device = "cuda"
         self.eval = False
+
+        # Types of images used for training
+        self.use_color = False      
+        self.use_tof = False
+        self.use_depth = False # postprocessed depth map from ToF cameras, could be used to subtitute tof raw
+        self.use_motion_mask = False
+
+        # Image dimensions
+        self.tof_image_width = 320
+        self.tof_image_height = 240
+        self.tof_scale_factor = 1.0
+
+        self.color_image_width = 320
+        self.color_image_height = 240
+        self.color_scale_factor = 1.0
+
+        # ToF Dataset
+        self.dataset_type = "mitsuba"
+        self.view_start = 1 # dynamic = 1, static = 0.
+        self.num_views = 1
+        self.total_num_views = 1
+        
+        self.view_step = 1
+        self.val_start = 61
+        self.val_end = 122
+
+        self.train_views = "0,8" # used by static scenes -> If 0002.npy, then frame ID = 2
+        self.fix_view = False
+        
+        self.min_depth_fac = 0.05
+        self.max_depth_fac = 0.55
+        self.depth_range = 100.0 # c/f, twice the unambiguous range of the ToF sensor
+
+        # 3D ToF-Gaussians attributes
+        # XYZ Positions
+        self.init_method = "phase" # or "random"
+        self.phase_resolution_stride = 20
+        self.motion_mask_stride = 100
+        self.num_points = 10_000 # For random init
+        
+        # Phase shift
+        self.use_view_dependent_phase = False
+        self.phase_offset = 0.0
+
+        # Deformation MLP (Eulerian)
+        self.D = 6
+        self.W = 64
+        self.xyz_multires = 6
+        self.t_multires = 4
+
         super().__init__(parser, "Loading Parameters", sentinel)
 
     def extract(self, args):
