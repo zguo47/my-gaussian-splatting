@@ -43,7 +43,7 @@ class ToFDataset(object):
         frame_id = 0
         view_id = 0
 
-        while view_id < args.total_num_views and frame_id < MAX_ITERS:
+        while view_id < 1 and frame_id < MAX_ITERS:
             tof_filename = self._get_tof_filename(frame_id)
             color_filename = self._get_color_filename(frame_id)
             depth_filename = self._get_depth_filename(frame_id)
@@ -62,7 +62,7 @@ class ToFDataset(object):
             frame_id += 1
 
         # Create data list
-        self.data_list = list(range(args.total_num_views))
+        self.data_list = list(range(1))
 
     def _get_image_name(self, frame_id):
         return f"{frame_id:04d}"
@@ -180,14 +180,10 @@ class ToFDataset(object):
         return scipy.io.loadmat(color_filename)["color"].astype(np.float32)
 
     def _read_depth(self, depth_filename):
-        return np.zeros(
-            [self.args.tof_image_height, self.args.tof_image_width], dtype=np.float32
-        )
+        return np.zeros([240, 320], dtype=np.float32)
 
     def _read_motion_mask(self, motion_mask_filename):
-        return np.ones(
-            [self.args.tof_image_height, self.args.tof_image_width], dtype=np.float32
-        )
+        return np.ones([240, 320], dtype=np.float32)
 
     def _process_camera_params(self, args):
         self.tof_intrinsics, self.tof_extrinsics = get_camera_params(
@@ -199,9 +195,7 @@ class ToFDataset(object):
         )
         self.tof_poses = np.linalg.inv(self.tof_extrinsics)
         self.tof_poses, self.tof_tform = recenter_poses(self.tof_poses)
-        self.tof_intrinsics = [
-            np.copy(self.tof_intrinsics) for i in range(args.total_num_views)
-        ]
+        self.tof_intrinsics = [np.copy(self.tof_intrinsics) for i in range(1)]
 
         self.color_intrinsics, self.color_extrinsics = get_camera_params(
             os.path.join(
@@ -212,9 +206,7 @@ class ToFDataset(object):
         )
         self.color_poses = np.linalg.inv(self.color_extrinsics)
         self.color_poses, self.color_tform = recenter_poses(self.color_poses)
-        self.color_intrinsics = [
-            np.copy(self.color_intrinsics) for i in range(args.total_num_views)
-        ]
+        self.color_intrinsics = [np.copy(self.color_intrinsics) for i in range(1)]
 
         tlE = get_extrinsics(
             os.path.join(args.source_path, f"cams/tof_light_extrinsics.npy"),
@@ -233,10 +225,10 @@ class ToFDataset(object):
         ## Depth range
         depth_range_path = os.path.join(args.source_path, f"cams/depth_range.npy")
 
-        if os.path.exists(depth_range_path) and args.depth_range < 0:
+        if os.path.exists(depth_range_path) and 100.0 < 0:
             self.dataset["depth_range"] = np.load(depth_range_path).astype(np.float32)
         else:
-            self.dataset["depth_range"] = np.array(args.depth_range).astype(np.float32)
+            self.dataset["depth_range"] = np.array(100.0).astype(np.float32)
 
     def _process_tof(self, tof_im):
         return tof_im
@@ -259,34 +251,34 @@ class ToFDataset(object):
             self.dataset["tof_images"], _ = crop_mvs_input(
                 self.dataset["tof_images"],
                 self.dataset["tof_intrinsics"],
-                args.total_num_views,
+                1,
                 None,
-                args.tof_image_width,
-                args.tof_image_height,
+                320,
+                240,
             )
             self.dataset["tof_images"], _ = scale_mvs_input(
                 self.dataset["tof_images"],
                 self.dataset["tof_intrinsics"],
-                args.total_num_views,
+                1,
                 None,
-                args.tof_scale_factor,
+                1.0,
             )
 
         if args.use_color:
             self.dataset["color_images"], _ = crop_mvs_input(
                 self.dataset["color_images"],
                 self.dataset["color_intrinsics"],
-                args.total_num_views,
+                1,
                 None,
-                args.color_image_width,
-                args.color_image_height,
+                320,
+                240,
             )
             self.dataset["color_images"], _ = scale_mvs_input(
                 self.dataset["color_images"],
                 self.dataset["color_intrinsics"],
-                args.total_num_views,
+                1,
                 None,
-                args.color_scale_factor,
+                1.0,
             )
 
     def _stack_dataset(self, args):
@@ -361,17 +353,17 @@ class ToFDataset(object):
             self.i_train = [
                 i
                 for i in range(
-                    args.view_start,
-                    args.view_start + args.num_views * args.view_step,
-                    args.view_step,
+                    1,
+                    1 + 1 * 1,
+                    1,
                 )
             ]
             self.i_test = self.i_train
             self.i_val = [
                 i
                 for i in range(
-                    np.minimum(args.val_start, args.total_num_views - 1),
-                    np.minimum(args.val_end, args.total_num_views - 1),
+                    np.minimum(args.val_start, 0),
+                    np.minimum(args.val_end, 0),
                 )
             ]
         elif args.train_views != "":
