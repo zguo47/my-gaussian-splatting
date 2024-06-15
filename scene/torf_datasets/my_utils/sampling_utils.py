@@ -2,34 +2,38 @@ import numpy as np
 import tensorflow as tf
 from scipy import ndimage
 
-from scene.torf_datasets.utils.projection_utils import *
+from scene.torf_datasets.my_utils.projection_utils import *
+
 
 def depth_transform_inv(t_depth, near, far):
     return np.exp(t_depth * np.log(far + 1) - 1)
 
+
 def depth_transform(depth, near, far):
     return np.log(depth + 1) / np.log(far + 1)
+
 
 def importance_sample_error(error_maps, N_samples):
     # Sample frame
     frame_pmf = np.sum(error_maps, axis=(1, 2))
     image_index = sample_pdf(
         np.arange(0, error_maps.shape[0]).astype(np.float32), frame_pmf, 1
-        )
+    )
     image_index = int(np.squeeze(np.round(image_index)))
 
     # Sample pixels
     pixel_pmf = np.reshape(error_maps[image_index], [-1])
     pixel_index = sample_pdf(
         np.arange(0, pixel_pmf.shape[0]).astype(np.float32), pixel_pmf, N_samples
-        )
+    )
     pixel_index = np.squeeze(np.round(pixel_index))
 
     pixel_x = np.mod(pixel_index, error_maps.shape[-1])
-    pixel_y = (pixel_index // error_maps.shape[-1])
+    pixel_y = pixel_index // error_maps.shape[-1]
     pixels = np.stack([pixel_y, pixel_x], axis=-1).astype(np.int32)
 
     return image_index, pixels
+
 
 def sample_pdf(bins, weights, N_samples, det=False, base_uncertainty=1e-5):
 
@@ -41,76 +45,81 @@ def sample_pdf(bins, weights, N_samples, det=False, base_uncertainty=1e-5):
 
     # Take uniform samples
     if det:
-        u = tf.linspace(0., 1., N_samples)
+        u = tf.linspace(0.0, 1.0, N_samples)
         u = tf.broadcast_to(u, list(cdf.shape[:-1]) + [N_samples])
     else:
         u = tf.random.uniform(list(cdf.shape[:-1]) + [N_samples])
 
     # Invert CDF
-    inds = tf.searchsorted(cdf, u, side='right')
-    below = tf.maximum(0, inds-1)
-    above = tf.minimum(cdf.shape[-1]-1, inds)
+    inds = tf.searchsorted(cdf, u, side="right")
+    below = tf.maximum(0, inds - 1)
+    above = tf.minimum(cdf.shape[-1] - 1, inds)
     inds_g = tf.stack([below, above], -1)
-    cdf_g = tf.gather(cdf, inds_g, axis=-1, batch_dims=len(inds_g.shape)-2)
-    bins_g = tf.gather(bins, inds_g, axis=-1, batch_dims=len(inds_g.shape)-2)
+    cdf_g = tf.gather(cdf, inds_g, axis=-1, batch_dims=len(inds_g.shape) - 2)
+    bins_g = tf.gather(bins, inds_g, axis=-1, batch_dims=len(inds_g.shape) - 2)
 
-    denom = (cdf_g[..., 1] - cdf_g[..., 0])
+    denom = cdf_g[..., 1] - cdf_g[..., 0]
     denom = tf.where(denom < 1e-5, tf.ones_like(denom), denom)
     t = (u - cdf_g[..., 0]) / denom
     samples = bins_g[..., 0] + t * (bins_g[..., 1] - bins_g[..., 0])
 
     return samples
 
+
 def coarse_samples_np(near, far, args):
     min_depth = near
     max_depth = far
 
     # Generate samples
-    t_vals = np.linspace(0., 1., args.N_samples)
+    t_vals = np.linspace(0.0, 1.0, args.N_samples)
 
     if not args.lindisp:
-        z_vals = min_depth * (1. - t_vals) + max_depth * (t_vals)
+        z_vals = min_depth * (1.0 - t_vals) + max_depth * (t_vals)
     else:
-        z_vals = 1. / (1. / min_depth * (1. - t_vals) + 1. / max_depth * (t_vals))
-    
+        z_vals = 1.0 / (1.0 / min_depth * (1.0 - t_vals) + 1.0 / max_depth * (t_vals))
+
     return z_vals
+
 
 def shadow_samples(near, far, args):
-    t_vals = tf.cast(tf.linspace(0., 1., args.N_shadow_samples), near.dtype)[None]
-    z_vals = near[..., None] * (1. - t_vals) + far[..., None] * (t_vals)
-    
+    t_vals = tf.cast(tf.linspace(0.0, 1.0, args.N_shadow_samples), near.dtype)[None]
+    z_vals = near[..., None] * (1.0 - t_vals) + far[..., None] * (t_vals)
+
     return z_vals
+
 
 def coarse_samples_np(near, far, args):
     min_depth = near
     max_depth = far
 
     # Generate samples
-    t_vals = np.linspace(0., 1., args.N_samples)
+    t_vals = np.linspace(0.0, 1.0, args.N_samples)
 
     if not args.lindisp:
-        z_vals = min_depth * (1. - t_vals) + max_depth * (t_vals)
+        z_vals = min_depth * (1.0 - t_vals) + max_depth * (t_vals)
     else:
-        z_vals = 1. / (1. / min_depth * (1. - t_vals) + 1. / max_depth * (t_vals))
-    
+        z_vals = 1.0 / (1.0 / min_depth * (1.0 - t_vals) + 1.0 / max_depth * (t_vals))
+
     return z_vals
+
 
 def coarse_samples(near, far, args):
     min_depth = near
     max_depth = far
 
     # Generate samples
-    t_vals = tf.cast(tf.linspace(0., 1., args.N_samples), near.dtype)
+    t_vals = tf.cast(tf.linspace(0.0, 1.0, args.N_samples), near.dtype)
 
     if not args.lindisp:
-        z_vals = min_depth * (1. - t_vals) + max_depth * (t_vals)
+        z_vals = min_depth * (1.0 - t_vals) + max_depth * (t_vals)
     else:
-        z_vals = 1. / (1. / min_depth * (1. - t_vals) + 1. / max_depth * (t_vals))
-    
+        z_vals = 1.0 / (1.0 / min_depth * (1.0 - t_vals) + 1.0 / max_depth * (t_vals))
+
     return z_vals
 
+
 def perturb_samples(z_vals):
-    mids = .5 * (z_vals[..., 1:] + z_vals[..., :-1])
+    mids = 0.5 * (z_vals[..., 1:] + z_vals[..., :-1])
     upper = tf.concat([mids, z_vals[..., -1:]], -1)
     lower = tf.concat([z_vals[..., :1], mids], -1)
 
@@ -119,44 +128,58 @@ def perturb_samples(z_vals):
 
     return z_vals
 
+
 def fine_samples(coarse_z_vals, near, far, weights, chunk_inputs, args):
-    if 'sampling_volume' in chunk_inputs \
-        and (chunk_inputs['sampling_volume'] is not None) \
-            and args.use_depth_sampling:
-        weights = tf.reshape(chunk_inputs['sampling_volume'], [-1, args.N_samples])
+    if (
+        "sampling_volume" in chunk_inputs
+        and (chunk_inputs["sampling_volume"] is not None)
+        and args.use_depth_sampling
+    ):
+        weights = tf.reshape(chunk_inputs["sampling_volume"], [-1, args.N_samples])
 
     # PDF distances
-    coarse_z_vals_mid = .5 * (coarse_z_vals[..., 1:] + coarse_z_vals[..., :-1])
+    coarse_z_vals_mid = 0.5 * (coarse_z_vals[..., 1:] + coarse_z_vals[..., :-1])
     fine_z_vals = sample_pdf(
-        coarse_z_vals_mid, weights[..., 1:-1], args.N_importance,
-        det=(args.perturb == 0.), base_uncertainty=args.base_uncertainty
-        )
+        coarse_z_vals_mid,
+        weights[..., 1:-1],
+        args.N_importance,
+        det=(args.perturb == 0.0),
+        base_uncertainty=args.base_uncertainty,
+    )
     fine_z_vals = tf.stop_gradient(fine_z_vals)
 
     # Fine sample points
     return fine_z_vals
+
 
 def shadow_fine_samples(coarse_z_vals, near, far, weights, args):
     # PDF distances
-    coarse_z_vals_mid = .5 * (coarse_z_vals[..., 1:] + coarse_z_vals[..., :-1])
+    coarse_z_vals_mid = 0.5 * (coarse_z_vals[..., 1:] + coarse_z_vals[..., :-1])
     fine_z_vals = sample_pdf(
-        coarse_z_vals_mid, weights[..., 1:-1], args.N_shadow_samples,
-        det=(args.perturb == 0.), base_uncertainty=args.base_uncertainty
-        )
+        coarse_z_vals_mid,
+        weights[..., 1:-1],
+        args.N_shadow_samples,
+        det=(args.perturb == 0.0),
+        base_uncertainty=args.base_uncertainty,
+    )
     fine_z_vals = tf.stop_gradient(fine_z_vals)
 
     # Fine sample points
     return fine_z_vals
+
 
 def repeat_int(x, num_repeats):
     x = tf.tile(tf.expand_dims(x, axis=1), [1, num_repeats])
     return tf.reshape(x, [-1])
 
+
 def constant_weight(d, s):
     return tf.ones_like(d)
 
+
 def linear_weight(d, s):
-    return tf.math.maximum(1 - tf.abs(d), 0.)
+    return tf.math.maximum(1 - tf.abs(d), 0.0)
+
 
 def euclidean_weight(k):
     def weight(diff_x, shift_x, diff_y, shift_y):
@@ -165,13 +188,14 @@ def euclidean_weight(k):
 
     return weight
 
+
 def interpolate_image(
-        image,
-        pixels,
-        shifts_x=list(range(-3, 5)),
-        shifts_y=list(range(-3, 5)),
-        weight_fn=euclidean_weight(3)
-        ):
+    image,
+    pixels,
+    shifts_x=list(range(-3, 5)),
+    shifts_y=list(range(-3, 5)),
+    weight_fn=euclidean_weight(3),
+):
     batch_size, pixels_height, pixels_width, _ = pixels.shape
     _, height, width, channels = image.shape
     image_shape = [batch_size, pixels_height, pixels_width, channels]
@@ -192,30 +216,34 @@ def interpolate_image(
 
     # Interpolate
     b = repeat_int(tf.range(batch_size), pixels_height * pixels_width)
-    res = 0.
-    total_weight = 0.
+    res = 0.0
+    total_weight = 0.0
 
-    for (sx, sy) in shifts:
+    for sx, sy in shifts:
         px, py = (x0 + sx, y0 + sy)
-        diff_x, diff_y = (tf.abs(x - tf.cast(px, image.dtype)), tf.abs(y - tf.cast(py, image.dtype)))
+        diff_x, diff_y = (
+            tf.abs(x - tf.cast(px, image.dtype)),
+            tf.abs(y - tf.cast(py, image.dtype)),
+        )
         ind = tf.stack([b, py, px], axis=1)
         weight = weight_fn(diff_x, sx, diff_y, sy)[:, None]
 
         res += tf.gather_nd(image, ind) * weight
         total_weight += weight
-    
+
     res = tf.math.divide_no_nan(res, total_weight)
 
     return tf.reshape(res, image_shape)
 
+
 def splat_image(
-        image,
-        out_shape,
-        pixels,
-        shifts_x=list(range(-3, 5)),
-        shifts_y=list(range(-3, 5)),
-        weight_fn=euclidean_weight(3)
-        ):
+    image,
+    out_shape,
+    pixels,
+    shifts_x=list(range(-3, 5)),
+    shifts_y=list(range(-3, 5)),
+    weight_fn=euclidean_weight(3),
+):
     batch_size, pixels_height, pixels_width, _ = pixels.shape
     _, height, width, channels = image.shape
     image_shape = [batch_size, pixels_height, pixels_width, channels]
@@ -239,9 +267,11 @@ def splat_image(
     b = repeat_int(tf.range(batch_size), pixels_height * pixels_width)
     res = 0.0
 
-    for (sx, sy) in shifts:
+    for sx, sy in shifts:
         px, py = x0 + sx, y0 + sy
-        diff_x, diff_y = tf.abs(x - tf.cast(px, image.dtype)), tf.abs(y - tf.cast(py, image.dtype))
+        diff_x, diff_y = tf.abs(x - tf.cast(px, image.dtype)), tf.abs(
+            y - tf.cast(py, image.dtype)
+        )
 
         # Pixel values
         weight = weight_fn(diff_x, sx, diff_y, sy)[..., None]
@@ -251,54 +281,50 @@ def splat_image(
     # Return
     return tf.reshape(res, out_shape)
 
+
 def project_points(points, P):
     projected_points = transform_points(points, P)
 
     projected_pixels = tf.math.divide_no_nan(
-        projected_points[..., :2],
-        projected_points[..., -1:]
-        )
-    
+        projected_points[..., :2], projected_points[..., -1:]
+    )
+
     projected_pixels = tf.where(
         projected_points[..., -1:] < 0,
         -tf.ones_like(projected_pixels),
-        projected_pixels
-        )
-    
+        projected_pixels,
+    )
+
     return tf.reshape(projected_pixels, points.shape[:-1] + (2,))
+
 
 def depth_to_index_np(depth, near, far, args):
     depth_inds = np.floor(((depth - near) / (far - near)) * args.N_samples)
     depth_inds = np.clip(depth_inds, 0, args.N_samples - 1)
     return int(depth_inds)
 
+
 def depth_to_index(depth, near, far, args):
     depth_inds = tf.math.floor(((depth - near) / (far - near)) * args.N_samples)
     depth_inds = tf.clip_by_value(depth_inds, 0, args.N_samples - 1)
     return tf.cast(depth_inds, tf.int32)
 
+
 def normalize_volume_np(volume):
     volume = volume / (np.sum(volume, axis=-1, keepdims=True))
 
-    return np.where(
-        np.math.isnan(volume),
-        np.zeros_like(volume),
-        volume
-        )
+    return np.where(np.math.isnan(volume), np.zeros_like(volume), volume)
+
 
 def normalize_volume(volume):
     volume = volume / (tf.reduce_sum(volume, axis=-1, keepdims=True))
 
-    return tf.where(
-        tf.math.is_nan(volume),
-        tf.zeros_like(volume),
-        volume
-        )
+    return tf.where(tf.math.is_nan(volume), tf.zeros_like(volume), volume)
+
 
 def interp_sampling_volume(
-    volume_probs, volume_poses,
-    pose, H, W, K_inv, K_volume, near, far, args
-    ):
+    volume_probs, volume_poses, pose, H, W, K_inv, K_volume, near, far, args
+):
     rays_o, rays_d = get_rays_matrix(H, W, pose @ K_inv)
     z_vals = coarse_samples(near, far, None, args)
 
@@ -322,31 +348,30 @@ def interp_sampling_volume(
 
         for i, z in enumerate(z_vals):
             points = rays_o + rays_d * z
-            pixels = project_points(
-                points, proj_matrix
-                )
+            pixels = project_points(points, proj_matrix)
 
             cur_volume_prob = interpolate_image(
-                volume_prob[None],
-                pixels[None],
-                shifts_x=[0],
-                shifts_y=[0]
-                )
-            
+                volume_prob[None], pixels[None], shifts_x=[0], shifts_y=[0]
+            )
+
             # Accumulate probability from sampling volume
             t_points = transform_points(points, inv_v_pose)
             look_up_z = t_points[..., -1]
-            depth_ind = tf.cast(tf.one_hot(depth_to_index(look_up_z, near, far, args), args.N_samples), tf.bool)
+            depth_ind = tf.cast(
+                tf.one_hot(depth_to_index(look_up_z, near, far, args), args.N_samples),
+                tf.bool,
+            )
 
-            probs[i] += tf.reshape(cur_volume_prob[depth_ind[None]], cur_volume_prob.shape[:-1])
-    
+            probs[i] += tf.reshape(
+                cur_volume_prob[depth_ind[None]], cur_volume_prob.shape[:-1]
+            )
+
     return tf.stack(probs, axis=-1)
 
+
 def splat_sampling_volume(
-    depths, depth_poses, pose,
-    ray_gen_fn, project_fn,
-    H, W, near, far, args
-    ):
+    depths, depth_poses, pose, ray_gen_fn, project_fn, H, W, near, far, args
+):
     pose = tf.cast(pose, tf.float32)
     inv_pose = tf.linalg.inv(pose)
     near = tf.cast(near, tf.float32)
@@ -378,13 +403,16 @@ def splat_sampling_volume(
             depth_one_hot[None].shape,
             pixels[None],
             shifts_x=[0],
-            shifts_y=[0]
-            )
-    
+            shifts_y=[0],
+        )
+
     return probs
 
+
 def depth_to_sampling_volume(depth, near, far, args):
-    depth_inds = depth_to_index(depth, tf.cast(near, tf.float32), tf.cast(far, tf.float32), args)
+    depth_inds = depth_to_index(
+        depth, tf.cast(near, tf.float32), tf.cast(far, tf.float32), args
+    )
     sampling_volume = tf.one_hot(depth_inds, args.N_samples)
 
     sampling_volume = ndimage.gaussian_filter(sampling_volume, sigma=[5.0, 5.0, 0.0])
@@ -393,12 +421,21 @@ def depth_to_sampling_volume(depth, near, far, args):
 
     return sampling_volume
 
+
 def splat_sampling_volume_from_views(
-    train_sampling_volumes, train_sampling_depths,
-    all_poses, test_pose,
-    ray_gen_fn, project_fn,
-    H, W, near, far, render_kwargs, args
-    ):
+    train_sampling_volumes,
+    train_sampling_depths,
+    all_poses,
+    test_pose,
+    ray_gen_fn,
+    project_fn,
+    H,
+    W,
+    near,
+    far,
+    render_kwargs,
+    args,
+):
 
     # Sampling volume
     sampling_volume = 0.0
@@ -408,10 +445,17 @@ def splat_sampling_volume_from_views(
         train_depth = train_sampling_depths[img_i][..., None]
 
         sampling_volume += splat_sampling_volume(
-            [train_depth], [train_pose], test_pose,
-            ray_gen_fn, project_fn,
-            H, W, near, far, args
-            )[0]
+            [train_depth],
+            [train_pose],
+            test_pose,
+            ray_gen_fn,
+            project_fn,
+            H,
+            W,
+            near,
+            far,
+            args,
+        )[0]
 
     sampling_volume = ndimage.gaussian_filter(sampling_volume, sigma=[5.0, 5.0, 0.0])
     sampling_volume = ndimage.gaussian_filter1d(sampling_volume, sigma=5.0)
@@ -419,7 +463,8 @@ def splat_sampling_volume_from_views(
 
     return sampling_volume
 
+
 def sample_on_unit_sphere(N):
-    shape = (N,3)
+    shape = (N, 3)
     points = tf.random.normal(shape)
     return tf.linalg.normalize(points, axis=-1)
