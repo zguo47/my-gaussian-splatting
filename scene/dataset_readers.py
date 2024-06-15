@@ -13,7 +13,7 @@ import os
 import sys
 import math
 from PIL import Image
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from scene.colmap_loader import (
     read_extrinsics_text,
     read_intrinsics_text,
@@ -52,6 +52,9 @@ class CameraInfo(NamedTuple):
     image_name: str
     width: int
     height: int
+    znear: Optional[float] = 0.01 # Default value from 3DGS
+    zfar: Optional[float] = 100.0
+    depth_range: Optional[float] = 100.0
 
 
 class SceneInfo(NamedTuple):
@@ -369,6 +372,8 @@ def readToRFCameras(dataset, frame_ids, args):
                 width=320,
                 height=240,  # We assume that the size of color and tof images are the same
                 image_name=image_name,
+                znear=dataset.dataset['bounds'][0].item(),
+                zfar=dataset.dataset['bounds'][1].item()
             )
         )
     return cam_infos
