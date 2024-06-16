@@ -63,12 +63,12 @@ class ModelParams(ParamGroup):
         self.use_motion_mask = False
 
         # Image dimensions
-        self.tof_image_width = 320
-        self.tof_image_height = 240
+        self.tof_image_width = 640
+        self.tof_image_height = 480
         self.tof_scale_factor = 1.0
 
-        self.color_image_width = 320
-        self.color_image_height = 240
+        self.color_image_width = 640
+        self.color_image_height = 480
         self.color_scale_factor = 1.0
 
         # ToF Dataset

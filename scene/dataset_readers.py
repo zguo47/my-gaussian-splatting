@@ -356,8 +356,8 @@ def readToRFCameras(dataset, frame_ids, args):
 
         image_name = dataset._get_image_name(frame_id)
 
-        FovY = 2 * np.arctan2(240, 2 * dataset.tof_intrinsics[view_id][1, 1])  # radian
-        FovX = 2 * np.arctan2(320, 2 * dataset.tof_intrinsics[view_id][0, 0])
+        FovY = 2 * np.arctan2(480, 2 * dataset.tof_intrinsics[view_id][1, 1])  # radian
+        FovX = 2 * np.arctan2(640, 2 * dataset.tof_intrinsics[view_id][0, 0])
 
         cam_infos.append(
             CameraInfo(
@@ -368,8 +368,8 @@ def readToRFCameras(dataset, frame_ids, args):
                 image_path=color_image_path,  # RGB GT
                 FovY=FovY,
                 FovX=FovX,
-                width=320,
-                height=240,  # We assume that the size of color and tof images are the same
+                width=640,
+                height=480,  # We assume that the size of color and tof images are the same
                 image_name=image_name,
                 znear=dataset.dataset['bounds'][0].item(),
                 zfar=dataset.dataset['bounds'][1].item()
@@ -491,32 +491,41 @@ def readToFPhasorStaticInfo(path, args, all_args):
     #             file=sys.stderr,
     #         )
     #         sys.exit(1)
+    txt_path = os.path.join(path, "cams/points3D.txt")
+
 
     ply_path = os.path.join(path, "points3d.ply")
     if os.path.exists(ply_path):
         os.remove(ply_path)
 
-    colors = None
-
-    num_pts = 10000
-    print(f"Generating random point cloud ({num_pts})...")
-
-    # Init xyz
-    min_bounds, max_bounds = calculateSceneBounds(train_cam_infos, all_args)
-    xyz = np.random.uniform(min_bounds, max_bounds, (num_pts, 3))
-
-    shs_color = RGB2SH(np.ones((num_pts, 3)) * 0.5)
-    colors = SH2RGB(shs_color)
-
-    pcd = BasicPointCloud(points=xyz, colors=colors, normals=np.zeros((num_pts, 3)))
-
-    colors *= 255.0
-    storePly(ply_path, xyz, colors)
-
+    xyz, rgb, _ = read_points3D_text(txt_path)
+    storePly(ply_path, xyz, rgb)
     try:
         pcd = fetchPly(ply_path)
     except:
         pcd = None
+
+    # colors = None
+
+    # num_pts = 10000
+    # print(f"Generating random point cloud ({num_pts})...")
+
+    # # Init xyz
+    # min_bounds, max_bounds = calculateSceneBounds(train_cam_infos, all_args)
+    # xyz = np.random.uniform(min_bounds, max_bounds, (num_pts, 3))
+
+    # shs_color = RGB2SH(np.ones((num_pts, 3)) * 0.5)
+    # colors = SH2RGB(shs_color)
+
+    # pcd = BasicPointCloud(points=xyz, colors=colors, normals=np.zeros((num_pts, 3)))
+
+    # colors *= 255.0
+    # storePly(ply_path, xyz, colors)
+
+    # try:
+    #     pcd = fetchPly(ply_path)
+    # except:
+    #     pcd = None
 
     scene_info = SceneInfo(
         point_cloud=pcd,
