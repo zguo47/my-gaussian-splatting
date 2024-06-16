@@ -128,6 +128,9 @@ class ToFDataset(object):
             depth_filename = self._get_depth_filename(frame_id)
             # motion_mask_filename = self._get_motion_mask_filename(frame_id)
 
+            print(self.tof_extrinsics)
+            print(self.tof_extrinsics.shape)
+
             ## Camera params
             self.dataset["tof_intrinsics"] += [self.tof_intrinsics[view_id]]
             self.dataset["tof_extrinsics"] += [self.tof_extrinsics[view_id]]
