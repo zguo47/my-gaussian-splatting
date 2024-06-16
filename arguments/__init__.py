@@ -74,8 +74,8 @@ class ModelParams(ParamGroup):
         # ToF Dataset
         self.dataset_type = "real"
         self.view_start = 1 # dynamic = 1, static = 0.
-        self.num_views = 1
-        self.total_num_views = 1
+        self.num_views = 68
+        self.total_num_views = 68
         
         self.view_step = 1
         self.val_start = 61
