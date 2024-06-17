@@ -52,7 +52,7 @@ class CameraInfo(NamedTuple):
     image_name: str
     width: int
     height: int
-    znear: Optional[float] = 0.01 # Default value from 3DGS
+    znear: Optional[float] = 0.01  # Default value from 3DGS
     zfar: Optional[float] = 100.0
     depth_range: Optional[float] = 100.0
 
@@ -356,8 +356,10 @@ def readToRFCameras(dataset, frame_ids, args):
 
         image_name = dataset._get_image_name(frame_id)
 
-        FovY = 2 * np.arctan2(480, 2 * dataset.tof_intrinsics[view_id][1, 1])  # radian
-        FovX = 2 * np.arctan2(640, 2 * dataset.tof_intrinsics[view_id][0, 0])
+        FovY = 2 * np.arctan2(
+            480, 2 * dataset.color_intrinsics[view_id][1, 1]
+        )  # radian
+        FovX = 2 * np.arctan2(640, 2 * dataset.color_intrinsics[view_id][0, 0])
 
         cam_infos.append(
             CameraInfo(
@@ -371,8 +373,8 @@ def readToRFCameras(dataset, frame_ids, args):
                 width=640,
                 height=480,  # We assume that the size of color and tof images are the same
                 image_name=image_name,
-                znear=dataset.dataset['bounds'][0].item(),
-                zfar=dataset.dataset['bounds'][1].item()
+                znear=dataset.dataset["bounds"][0].item(),
+                zfar=dataset.dataset["bounds"][1].item(),
             )
         )
     return cam_infos
@@ -492,7 +494,6 @@ def readToFPhasorStaticInfo(path, args, all_args):
     #         )
     #         sys.exit(1)
     txt_path = os.path.join(path, "cams/points3D.txt")
-
 
     ply_path = os.path.join(path, "points3d.ply")
     if os.path.exists(ply_path):
