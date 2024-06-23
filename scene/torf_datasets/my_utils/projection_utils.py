@@ -123,7 +123,8 @@ def normalize_vector_np(v):
 
 
 def normalize(v):
-    return tf.linalg.l2_normalize(v, axis=-1, epsilon=1e-6)
+    norm = np.linalg.norm(v, axis=-1, keepdims=True)
+    return v / (norm + 1e-6)
 
 
 def get_rays(H, W, focal, c2w):
