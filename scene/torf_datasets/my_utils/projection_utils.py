@@ -51,7 +51,7 @@ def add_pose_noise(poses, t_scale=0.1):
 
 
 def se3_vee(mat):
-    mat = tf.contrib.linalg.logm(tf.cast(mat, tf.complex64))
+    mat = tf.linalg.logm(tf.cast(mat, tf.complex64))
     twist = tf.stack(
         [
             mat[..., 2, 1],
